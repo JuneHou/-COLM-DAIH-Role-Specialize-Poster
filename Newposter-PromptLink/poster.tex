@@ -7,8 +7,7 @@
 %
 % Layout (square poster, main figure is landscape 715 x 466 pt, ratio 1.53):
 %   headline
-%   takeaway banner (one sentence)
-%   row 1 : motivation / questions / design + ablation | main figure (hero, ~43 cm wide)
+%   row 1 : motivation / questions / design + ablation | main figure (hero, ~47 cm wide)
 %   row 2 : role isolation + takeaways | main result | mechanism + boundary
 %   row 3 : scope and limitations strip | QR codes
 %   footer: references + acknowledgments
@@ -86,8 +85,6 @@
 \newcommand{\optionalgraphic}[2]{%
   \IfFileExists{#1}{\includegraphics[#2]{#1}}{}%
 }
-% Small-print note (table footnotes, captions).
-\newcommand{\finenote}[1]{{\fontsize{18}{22}\selectfont\color{MidGray}#1}}
 % Big-number call-out used in the result column.
 \newcommand{\bignumber}[2]{%
   \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.55em]{resultbox}
@@ -143,27 +140,13 @@ for Clinical Prediction}
 \begin{frame}[t]
 
 % =============================================================================
-% One-sentence story
-% =============================================================================
-\begin{beamercolorbox}[wd=\textwidth,rounded=true,sep=0.55em]{takeaway}
-  \centering
-  {\fontsize{27}{32}\selectfont\bfseries
-  Two large open-weight analysts plus one small open-weight integrator, all run
-  locally with no training, match Claude~3.5 few-shot on MIMIC-IV mortality
-  Macro-F1 (58.8 vs.\ 57.4) and flag nearly four times as many true high-risk patients
-  (sensitivity 61.1 vs.\ 15.8).}
-\end{beamercolorbox}
-
-\vspace{0.35cm}
-
-% =============================================================================
 % Row 1: motivation / questions / design + ablation  |  main figure (hero)
 % =============================================================================
 \setlength{\columnsep}{0.70cm}
 \begin{columns}[t,totalwidth=\textwidth]
 
   % ---------------------------------------------------------------------------
-  \begin{column}{0.46\textwidth}
+  \begin{column}{0.415\textwidth}
     \begin{block}{Why an Open-Weight, Role-Specialized System?}
       \justifying
       \smallcapslabel{Deployment gap.} Closed-model APIs perform well on EHR
@@ -185,7 +168,7 @@ for Clinical Prediction}
       \end{beamercolorbox}
 
       \vspace{0.45em}
-      \smallcapslabel{Design (figure, right).}
+      \smallcapslabel{Design (Figure 1).}
       \begin{itemize}\tightitems
         \item \textcolor{AnalystBlue}{\textbf{Two label-blind analysts.}}
           The risk analyst reads the target record with the nearest
@@ -199,9 +182,9 @@ for Clinical Prediction}
           fixed; only topology and model placement vary.
       \end{itemize}
 
-      \vspace{0.30em}
-      \finenote{Large $=$ GPT-OSS-120B, small $=$ Qwen2.5-7B, both served
-      locally. Reported system: large analysts, small integrator.}
+      \vspace{0.35em}
+      \smallcapslabel{Models.} Large $=$ GPT-OSS-120B, small $=$ Qwen2.5-7B,
+      both served locally. Reported system: large analysts, small integrator.
     \end{block}
 
     \vspace{0.25cm}
@@ -210,7 +193,7 @@ for Clinical Prediction}
       \begin{columns}[T,totalwidth=\linewidth]
         \begin{column}{0.56\linewidth}
           \centering
-          \finenote{\textbf{GPT-OSS-120B, MIMIC-IV mortality, full test set}}\\[0.15em]
+          \textbf{GPT-OSS-120B, MIMIC-IV mortality}\\[0.15em]
           \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.56\linewidth}cc@{}}
             \toprule
             \textbf{Configuration} & \textbf{F1} & \textbf{Sens.} \\
@@ -235,18 +218,18 @@ for Clinical Prediction}
   \end{column}
 
   % ---------------------------------------------------------------------------
-  \begin{column}{0.53\textwidth}
+  \begin{column}{0.575\textwidth}
     \begin{block}{Pipeline: Multi-Source Databases and Role-Specialized Retrieval}
       \centering
       \includegraphics[width=\linewidth]{Newposter-PromptLink/figures/Paper/main.pdf}
 
-      \vspace{0.15em}
+      \vspace{0.25em}
       \justifying
-      \finenote{\textbf{(A)} Offline databases: medical knowledge
-      (MedCorp\,+\,UMLS) and patient exemplars (one positive, one negative
-      neighbour per target), both MedCPT-indexed. \textbf{(B)} Per patient:
-      two label-blind analysts, then one integrator that retrieves once and
-      outputs the event risk.}
+      \textbf{Figure 1.} \textbf{(A)} A knowledge database is built from
+      MedCorp and UMLS, and a patient database from the EHRs. \textbf{(B)} The
+      label-blind risk and protective analysts read the target record and
+      retrieve from both databases; the integrator runs its own retrieval and
+      integrates the two readings into the final prediction.
     \end{block}
   \end{column}
 
@@ -266,12 +249,12 @@ for Clinical Prediction}
 
   \begin{block}{Q1: The Integrator Sets the Operating Point}
     \centering
-    \finenote{\textbf{Role isolation, MIMIC-IV mortality, fixed $n=100$}}
+    \textbf{MIMIC-IV mortality, fixed $n=100$ subset}
 
     \vspace{0.20em}
     \begin{tabular}{@{}lccc@{}}
       \toprule
-      \textbf{A / R / I} & \textbf{F1} & \textbf{Sens.} & \textbf{AUROC} \\
+      \textbf{Analyst / Retrieval / Integrator} & \textbf{F1} & \textbf{Sens.} & \textbf{AUROC} \\
       \midrule
       oss / oss / oss   & 38.5 & 13.0 & .543 \\
       oss / qwen / oss  & 35.0 &  7.4 & .533 \\
@@ -289,10 +272,6 @@ for Clinical Prediction}
     Swapping only the integrator lifts sensitivity from 13.0 to 64.8.
     The same lift reproduces with GPT-4o analysts: a Qwen integrator raises
     recall from 3.7 to 57.4 (MIMIC-III mortality, $n=100$).
-
-    \vspace{0.25em}
-    \finenote{A/R/I $=$ analyst / retrieval / integrator model;
-    oss $=$ GPT-OSS-120B, qwen $=$ Qwen2.5-7B.}
   \end{block}
 
   \vspace{0.25cm}
@@ -318,8 +297,8 @@ for Clinical Prediction}
 
   \begin{block}{Q2: Main Result on MIMIC-IV Mortality}
     \centering
-    \finenote{\textbf{Full test set ($\approx$1,000 patients, 19.2\% positive),
-    threshold 0.5}}
+    \textbf{Full test set ($\approx$1,000 patients, 19.2\% positive),
+    threshold 0.5}
 
     \vspace{0.20em}
     \rowcolors{2}{white}{SoftGray!70}
@@ -328,12 +307,12 @@ for Clinical Prediction}
       \textbf{Method} & \textbf{Acc.} & \textbf{F1} & \textbf{Sens.} \\
       \midrule
       All-negative                       & 80.8 & 44.7 &  0.0 \\
-      \multicolumn{4}{@{}l}{\finenote{\emph{Task-supervised / fine-tuned}}} \\
+      \multicolumn{4}{@{}l}{\emph{Task-supervised / fine-tuned}} \\
       GraphCare                          & 91.5 & 80.3 & 57.8 \\
       KARE (fine-tuned LLM)              & 94.1 & 90.4 & 73.2 \\
-      \multicolumn{4}{@{}l}{\finenote{\emph{Training-free, closed API}}} \\
+      \multicolumn{4}{@{}l}{\emph{Training-free, closed API}} \\
       Claude 3.5 few-shot                & 84.5 & 57.4 & 15.8 \\
-      \multicolumn{4}{@{}l}{\finenote{\emph{Training-free, open-weight, local (ours)}}} \\
+      \multicolumn{4}{@{}l}{\emph{Training-free, open-weight, local (ours)}} \\
       GPT-OSS single $+$ RAG $+$ Sim     & 71.6 & 52.8 & 22.1 \\
       All-large (oss / oss / oss)        & 78.7 & 54.4 & 14.7 \\
       All-small (qwen / qwen / qwen)     & 65.6 & 58.0 & 60.0 \\
