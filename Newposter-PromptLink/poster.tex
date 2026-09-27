@@ -7,9 +7,9 @@
 %
 % Layout (square poster, main figure is landscape 715 x 466 pt, ratio 1.53):
 %   headline
-%   row 1 : motivation / questions / design + ablation | main figure (hero, ~47 cm wide)
-%   row 2 : role isolation + takeaways | main result | mechanism + boundary
-%   row 3 : scope and limitations strip | QR codes
+%   row 1 : motivation, roles, cohorts | original main figure
+%   row 2 : role swap and ablation | full-set and cross-task results | mechanism
+%   row 3 : concise scope | QR codes
 %   footer: references + acknowledgments
 
 \documentclass[final,xcolor=table]{beamer}
@@ -75,23 +75,10 @@
 \setbeamerfont{block body}{size=\fontsize{24}{29}\selectfont}
 \setbeamerfont{normal text}{size=\fontsize{24}{29}\selectfont}
 
-\newcommand{\tightitems}{%
-  \setlength{\itemsep}{0.30em}%
-  \setlength{\parskip}{0pt}%
-  \setlength{\parsep}{0pt}%
-}
 \newcommand{\smallcapslabel}[1]{\textcolor{VTMaroon}{\textbf{#1}}}
-\newcommand{\metric}[2]{\textbf{#1}\;\textcolor{VTMaroon}{\textbf{#2}}}
 \newcommand{\optionalgraphic}[2]{%
   \IfFileExists{#1}{\includegraphics[#2]{#1}}{}%
 }
-% Big-number call-out used in the result column.
-\newcommand{\bignumber}[2]{%
-  \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.55em]{resultbox}
-    \centering
-    {\fontsize{34}{38}\selectfont\bfseries\color{VTMaroon}#1}\\[0.12em]
-    {\fontsize{20}{24}\selectfont #2}
-  \end{beamercolorbox}}
 
 % -----------------------------------------------------------------------------
 % Metadata
@@ -116,14 +103,14 @@
   \end{tikzpicture}
 }
 
-% Only these two fields are changed
+% Paper metadata
 \title{Role-Specialized Mixture-of-Agents with Open-Weight LLMs
 \\[10pt]
 for Clinical Prediction}
 
 \author{Jun Hou, Yi Fang, Xuan Wang}
 
-% Unchanged from the original template
+% Author contact
 \institute{{junh, yif, xuanw}@vt.edu}
 
 % The Lankton footline expects these two macros; without them the file does
@@ -139,343 +126,342 @@ for Clinical Prediction}
 \begin{document}
 \begin{frame}[t]
 
-% =============================================================================
-% Row 1: motivation / questions / design + ablation  |  main figure (hero)
-% =============================================================================
+% The paper's original pipeline remains the visual anchor of the poster.
 \setlength{\columnsep}{0.70cm}
 \begin{columns}[t,totalwidth=\textwidth]
-
-  % ---------------------------------------------------------------------------
   \begin{column}{0.415\textwidth}
-    \begin{block}{Why an Open-Weight, Role-Specialized System?}
+    \begin{block}{Why Separate the Roles?}
       \justifying
-      \smallcapslabel{Deployment gap.} Closed-model APIs perform well on EHR
-      prediction but raise privacy and compliance concerns. Local fine-tuning
-      avoids the API but needs labeled cohorts, training compute, and
-      per-task adaptation.
+      Clinical prediction from EHRs needs locally deployable models when
+      closed-model APIs raise privacy and compliance concerns. Most medical
+      multi-agent systems are evaluated as one unit, obscuring which role
+      changes the prediction.
 
-      \vspace{0.30em}
-      \smallcapslabel{Evaluation gap.} Medical multi-agent systems are usually
-      scored as one block, so it is unclear which role controls the prediction
-      and whether retrieval drives the gain.
-
-      \vspace{0.45em}
-      \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.45em]{notebox}
-        \textbf{Q1.} Which role sets the operating point at which patients are
-        flagged?\\[0.25em]
+      \vspace{0.50em}
+      \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.48em]{notebox}
+        \textbf{Q1.} Which agent role changes the point at which a patient
+        is flagged?\\[0.36em]
         \textbf{Q2.} Can open-weight agents approach closed-model prompting
-        without any training?
+        without task-specific training?
+      \end{beamercolorbox}
+    \end{block}
+
+    \vspace{0.28cm}
+
+    \begin{block}{Controlled Role Design}
+      \smallcapslabel{Two contrastive analysts}\par
+      \textcolor{AnalystBlue}{\textbf{Risk:}} compare the target EHR with a
+      positive-outcome exemplar.\\[0.25em]
+      \textcolor{ProtectTeal}{\textbf{Protective:}} compare it with a
+      negative-outcome exemplar. Neither analyst sees the target label or
+      makes the final prediction.
+
+      \vspace{0.42em}
+      \smallcapslabel{One integrator}\par
+      Reconcile both readings, retrieve additional medical knowledge, and
+      output risk $\hat p$; flag when $\hat p>0.5$.
+
+      \vspace{0.44em}
+      \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.46em]{resultbox}
+        \centering
+        \textbf{Studied assignment}\par\vspace{0.08em}
+        {\fontsize{26}{30}\selectfont
+        GPT-OSS-120B analysts $\rightarrow$ Qwen2.5-7B integrator}
       \end{beamercolorbox}
 
-      \vspace{0.45em}
-      \smallcapslabel{Design (Figure 1).}
-      \begin{itemize}\tightitems
-        \item \textcolor{AnalystBlue}{\textbf{Two label-blind analysts.}}
-          The risk analyst reads the target record with the nearest
-          positive-outcome exemplar; the protective analyst reads it with the
-          nearest negative-outcome exemplar. Neither sees a label or predicts.
-        \item \textcolor{VTMaroon}{\textbf{One integrator.}} Reconciles both
-          readings, issues one focused knowledge query, and outputs the risk
-          score $\hat p$; $\hat y = \mathbf{1}[\hat p > 0.5]$.
-        \item \textcolor{VTOrange}{\textbf{Controlled retrieval.}} MedCPT
-          retrieval over MedCorp\,+\,UMLS and KARE patient exemplars are
-          fixed; only topology and model placement vary.
-      \end{itemize}
-
-      \vspace{0.35em}
-      \smallcapslabel{Models.} Large $=$ GPT-OSS-120B, small $=$ Qwen2.5-7B,
-      both served locally. Reported system: large analysts, small integrator.
+      \vspace{0.36em}
+      \justifying
+      MedCorp + UMLS knowledge and the two patient exemplars are fixed
+      across role-assignment comparisons.
     \end{block}
 
-    \vspace{0.25cm}
+    \vspace{0.28cm}
 
-    \begin{block}{What Carries the Gain? Topology, Not Retrieval}
-      \begin{columns}[T,totalwidth=\linewidth]
-        \begin{column}{0.56\linewidth}
-          \centering
-          \textbf{GPT-OSS-120B, MIMIC-IV mortality}\\[0.15em]
-          \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.56\linewidth}cc@{}}
-            \toprule
-            \textbf{Configuration} & \textbf{F1} & \textbf{Sens.} \\
-            \midrule
-            CoT (no retrieval)        & 58.3 & 24.2 \\
-            single $+$ RAG            & 37.7 & 17.9 \\
-            single $+$ RAG $+$ Sim    & 52.8 & 22.1 \\
-            multi $+$ Sim             & 51.3 & 10.0 \\
-            multi $+$ RAG $+$ Sim     & 54.4 & 14.7 \\
-            \bottomrule
-          \end{tabular}
-        \end{column}
-        \begin{column}{0.42\linewidth}
-          \justifying
-          Retrieved knowledge alone \emph{hurts} a single agent
-          (58.3 $\to$ 37.7). The exemplar pair helps once it is split across
-          two contrastive analysts, and removing MedRAG from the pipeline moves
-          F1 by only 3.1 points.
-        \end{column}
-      \end{columns}
+    \begin{block}{Four Evaluation Settings}
+      \centering
+      {\fontsize{20}{24}\selectfont Positive-outcome prevalence
+      (about 1,000 test EHRs per setting)}\par\vspace{0.22em}
+      \begin{tabular}{@{}lcc@{}}
+        \toprule
+        \textbf{Outcome} & \textbf{MIMIC-III} & \textbf{MIMIC-IV} \\
+        \midrule
+        In-hospital mortality & 5.4\% & \textbf{19.2\%} \\
+        15-day readmission & 54.8\% & 46.5\% \\
+        \bottomrule
+      \end{tabular}
+
+      \vspace{0.28em}
+      \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.42em]{notebox}
+        \justifying
+        \textbf{Why report sensitivity?} On MIMIC-IV mortality, predicting
+        every patient as a survivor gives \textbf{80.8\% accuracy} but
+        \textbf{0\% sensitivity}.
+      \end{beamercolorbox}
     \end{block}
   \end{column}
 
-  % ---------------------------------------------------------------------------
   \begin{column}{0.575\textwidth}
-    \begin{block}{Pipeline: Multi-Source Databases and Role-Specialized Retrieval}
+    \begin{block}{Pipeline: Fixed Retrieval and Specialized Roles}
       \centering
       \includegraphics[width=\linewidth]{Newposter-PromptLink/figures/Paper/main.pdf}
-
-      \vspace{0.25em}
+      \vspace{0.24em}
       \justifying
-      \textbf{Figure 1.} \textbf{(A)} A knowledge database is built from
-      MedCorp and UMLS, and a patient database from the EHRs. \textbf{(B)} The
-      label-blind risk and protective analysts read the target record and
-      retrieve from both databases; the integrator runs its own retrieval and
-      integrates the two readings into the final prediction.
+      \textbf{Figure 1.} Medical knowledge and similar patients support two
+      contrastive readings. The integrator combines them, runs its own
+      focused retrieval, and produces the final risk score.
+    \end{block}
+  \end{column}
+\end{columns}
+
+\vspace{0.42cm}
+
+% Evidence follows the same reading order as the research questions:
+% controlled role swap, full-set result, and mechanism / task boundary.
+\begin{columns}[t,totalwidth=\textwidth]
+  \begin{column}{0.315\textwidth}
+    \begin{block}{Q1: Which Role Changes Sensitivity?}
+      \centering
+      {\fontsize{20}{24}\selectfont MIMIC-IV mortality, role-isolation subset
+      ($n=100$)}\par\vspace{0.25em}
+      {\fontsize{20}{24}\selectfont Sensitivity at the 0.5 cutoff (\%)}
+
+      \vspace{0.15em}
+      \begin{tikzpicture}[x=0.27cm,y=0.79cm]
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (0,8.0)
+          {All GPT-OSS-120B};
+        \fill[SoftGray] (0,7.20) rectangle (70,7.66);
+        \fill[AnalystBlue] (0,7.20) rectangle (13.0,7.66);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (72,7.43) {13.0};
+
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (0,6.1)
+          {Only retrieval model $\rightarrow$ Qwen};
+        \fill[SoftGray] (0,5.30) rectangle (70,5.76);
+        \fill[AnalystBlue] (0,5.30) rectangle (7.4,5.76);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (72,5.53) {7.4};
+
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (0,4.2)
+          {Only analyst $\rightarrow$ Qwen};
+        \fill[SoftGray] (0,3.40) rectangle (70,3.86);
+        \fill[AnalystBlue] (0,3.40) rectangle (11.1,3.86);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (72,3.63) {11.1};
+
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont,DeepNavy]
+          at (0,2.3) {\textbf{Only integrator $\rightarrow$ Qwen}};
+        \fill[SoftGray] (0,1.50) rectangle (70,1.96);
+        \fill[VTMaroon] (0,1.50) rectangle (64.8,1.96);
+        \node[anchor=west,font=\fontsize{20}{24}\selectfont\bfseries,VTMaroon]
+          at (72,1.73) {64.8};
+      \end{tikzpicture}
+
+      \vspace{0.30em}
+      \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.46em]{resultbox}
+        \centering
+        \textbf{Changing only the integrator}\par\vspace{0.12em}
+        Macro-F1: \textbf{38.5 $\rightarrow$ 57.4}\quad
+        AUROC: \textbf{.543 $\rightarrow$ .603}
+      \end{beamercolorbox}
+
+      \vspace{0.28em}
+      \justifying
+      The analyst or retrieval-model swap does not produce this high-recall
+      operating point. These are \textbf{subset results}, separate from the
+      full-test results at center.
+    \end{block}
+
+    \vspace{0.27cm}
+
+    \begin{block}{Component Check: Retrieval and Roles}
+      \centering
+      {\fontsize{20}{24}\selectfont GPT-OSS-120B, MIMIC-IV mortality;
+      macro-F1 (\%)}\par\vspace{0.08em}
+      \begin{tikzpicture}[x=0.27cm,y=0.65cm]
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (0,8.0)
+          {Single, no retrieval};
+        \fill[SoftGray] (0,7.23) rectangle (60,7.67);
+        \fill[AnalystBlue] (0,7.23) rectangle (58.3,7.67);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (62,7.45) {58.3};
+
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (0,6.0)
+          {Single + medical RAG};
+        \fill[SoftGray] (0,5.23) rectangle (60,5.67);
+        \fill[AnalystBlue] (0,5.23) rectangle (37.7,5.67);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (62,5.45) {37.7};
+
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (0,4.0)
+          {Single + RAG + exemplars};
+        \fill[SoftGray] (0,3.23) rectangle (60,3.67);
+        \fill[AnalystBlue] (0,3.23) rectangle (52.8,3.67);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (62,3.45) {52.8};
+
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont] at (0,2.0)
+          {Three roles + RAG + exemplars};
+        \fill[SoftGray] (0,1.23) rectangle (60,1.67);
+        \fill[VTMaroon] (0,1.23) rectangle (54.4,1.67);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont\bfseries,VTMaroon]
+          at (62,1.45) {54.4};
+      \end{tikzpicture}
+
+      \vspace{0.10em}
+      \justifying
+      With the same retrieved inputs, three roles raise macro-F1 from
+      \textbf{52.8 to 54.4}. The no-retrieval single model still scores
+      \textbf{58.3}; retrieval alone is not the source of the main result.
     \end{block}
   \end{column}
 
-\end{columns}
-
-\vspace{0.30cm}
-
-% =============================================================================
-% Row 2: role isolation + takeaways | main result | mechanism + boundary
-% =============================================================================
-\begin{columns}[t,totalwidth=\textwidth]
-
-% -----------------------------------------------------------------------------
-% LEFT: which role decides, then takeaways
-% -----------------------------------------------------------------------------
-\begin{column}{0.315\textwidth}
-
-  \begin{block}{Q1: The Integrator Sets the Operating Point}
-    \centering
-    \textbf{MIMIC-IV mortality, fixed $n=100$ subset}
-
-    \vspace{0.20em}
-    \begin{tabular}{@{}lccc@{}}
-      \toprule
-      \textbf{Analyst / Retrieval / Integrator} & \textbf{F1} & \textbf{Sens.} & \textbf{AUROC} \\
-      \midrule
-      oss / oss / oss   & 38.5 & 13.0 & .543 \\
-      oss / qwen / oss  & 35.0 &  7.4 & .533 \\
-      qwen / oss / oss  & 36.3 & 11.1 & .517 \\
-      \rowcolor{IntegratorGold!24}
-      \textbf{oss / oss / qwen} & \textbf{57.4} & \textbf{64.8} & \textbf{.603} \\
-      qwen / qwen / qwen & 54.6 & 59.3 & .491 \\
-      oss CoT (single) & 40.9 & 22.2 & .536 \\
-      \bottomrule
-    \end{tabular}
-
-    \vspace{0.30em}
-    \justifying
-    Swapping only the analyst or only the retrieval model changes little.
-    Swapping only the integrator lifts sensitivity from 13.0 to 64.8.
-    The same lift reproduces with GPT-4o analysts: a Qwen integrator raises
-    recall from 3.7 to 57.4 (MIMIC-III mortality, $n=100$).
-  \end{block}
-
-  \vspace{0.25cm}
-
-  \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.55em]{resultbox}
-    \textcolor{VTMaroon}{\textbf{Takeaways}}\par\vspace{0.15em}
-    \begin{enumerate}\tightitems
-      \item \textbf{Role placement matters:} the integrator, not the analysts
-        or the retriever, sets the high-recall operating point.
-      \item \textbf{Topology matters:} contrastive role separation makes
-        exemplars and retrieved knowledge usable; retrieval alone does not.
-      \item \textbf{Task signal bounds the gain:} mortality benefits;
-        readmission exposes the limit of the available record.
-    \end{enumerate}
-  \end{beamercolorbox}
-
-\end{column}
-
-% -----------------------------------------------------------------------------
-% MIDDLE: main result
-% -----------------------------------------------------------------------------
-\begin{column}{0.345\textwidth}
-
-  \begin{block}{Q2: Main Result on MIMIC-IV Mortality}
-    \centering
-    \textbf{Full test set ($\approx$1,000 patients, 19.2\% positive),
-    threshold 0.5}
-
-    \vspace{0.20em}
-    \rowcolors{2}{white}{SoftGray!70}
-    \begin{tabular}{@{}>{\raggedright\arraybackslash}p{0.50\linewidth}ccc@{}}
-      \toprule
-      \textbf{Method} & \textbf{Acc.} & \textbf{F1} & \textbf{Sens.} \\
-      \midrule
-      All-negative                       & 80.8 & 44.7 &  0.0 \\
-      \multicolumn{4}{@{}l}{\emph{Task-supervised / fine-tuned}} \\
-      GraphCare                          & 91.5 & 80.3 & 57.8 \\
-      KARE (fine-tuned LLM)              & 94.1 & 90.4 & 73.2 \\
-      \multicolumn{4}{@{}l}{\emph{Training-free, closed API}} \\
-      Claude 3.5 few-shot                & 84.5 & 57.4 & 15.8 \\
-      \multicolumn{4}{@{}l}{\emph{Training-free, open-weight, local (ours)}} \\
-      GPT-OSS single $+$ RAG $+$ Sim     & 71.6 & 52.8 & 22.1 \\
-      All-large (oss / oss / oss)        & 78.7 & 54.4 & 14.7 \\
-      All-small (qwen / qwen / qwen)     & 65.6 & 58.0 & 60.0 \\
-      \rowcolor{IntegratorGold!24}
-      \textbf{Large analysts, small integrator} & \textbf{66.4} &
-      \textbf{58.8} & \textbf{61.1} \\
-      \bottomrule
-    \end{tabular}
-
-    \vspace{0.45em}
-    \begin{columns}[T,totalwidth=\linewidth]
-      \begin{column}{0.485\linewidth}
-        \bignumber{+1.4 F1}{vs.\ Claude 3.5 few-shot}
-      \end{column}
-      \begin{column}{0.485\linewidth}
-        \bignumber{+45.3 Sens.}{vs.\ Claude 3.5 few-shot}
-      \end{column}
-    \end{columns}
-
-    \vspace{0.40em}
-    \justifying
-    The mixed assignment beats GRU, AdaCare, and GraphCare on sensitivity by
-    3.3--18.2 points, while those supervised models keep a 17.6--21.5 point
-    F1 lead. The all-negative row shows this sensitivity is not majority
-    guessing.
-
-    \vspace{0.25em}
-    \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.45em]{notebox}
+  \begin{column}{0.345\textwidth}
+    \begin{block}{Q2: Mortality on the Full Test Set}
       \centering
-      \textbf{Ranking is not improved:} full-set AUROC is 0.763 (single
-      large), 0.730 (all-large), 0.706 (mixed). The benefit is a shift of the
-      operating point at the default cutoff, not better discrimination.
-    \end{beamercolorbox}
-  \end{block}
+      {\fontsize{20}{24}\selectfont MIMIC-IV, about 1,000 patients;
+      19.2\% positive; threshold 0.5}\par\vspace{0.27em}
+      {\fontsize{19}{23}\selectfont
+      \textcolor{AnalystBlue}{\rule{0.7cm}{0.28cm}}\ Claude 3.5 few-shot\qquad
+      \textcolor{VTMaroon}{\rule{0.7cm}{0.28cm}}\ Mixed open-weight system}
 
-\end{column}
+      \vspace{0.22em}
+      \begin{tikzpicture}[x=0.212cm,y=0.73cm]
+        \node[anchor=west,font=\fontsize{21}{24}\selectfont\bfseries]
+          at (0,12.1) {Macro-F1 (\%)};
+        \fill[SoftGray] (0,11.00) rectangle (100,11.48);
+        \fill[AnalystBlue] (0,11.00) rectangle (57.4,11.48);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont]
+          at (59.0,11.24) {57.4};
+        \fill[SoftGray] (0,10.22) rectangle (100,10.70);
+        \fill[VTMaroon] (0,10.22) rectangle (58.8,10.70);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont\bfseries]
+          at (60.4,10.46) {58.8};
 
-% -----------------------------------------------------------------------------
-% RIGHT: mechanism and boundary
-% -----------------------------------------------------------------------------
-\begin{column}{0.315\textwidth}
+        \node[anchor=west,font=\fontsize{21}{24}\selectfont\bfseries]
+          at (0,8.9) {Sensitivity (\%)};
+        \fill[SoftGray] (0,7.80) rectangle (100,8.28);
+        \fill[AnalystBlue] (0,7.80) rectangle (15.8,8.28);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont]
+          at (17.4,8.04) {15.8};
+        \fill[SoftGray] (0,7.02) rectangle (100,7.50);
+        \fill[VTMaroon] (0,7.02) rectangle (61.1,7.50);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont\bfseries]
+          at (62.7,7.26) {61.1};
 
-  \begin{block}{Mechanism: A Lower Severity Threshold}
-    \begin{columns}[T,totalwidth=\linewidth]
-      \begin{column}{0.485\linewidth}
-        \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.40em]{notebox}
-          \centering
-          \textcolor{AnalystBlue}{\textbf{Large integrator}}\\[0.10em]
-          {\fontsize{20}{24}\selectfont
-          Positive only at many recorded conditions\\
-          High specificity\\
-          Misses moderate-risk deaths}
-        \end{beamercolorbox}
-      \end{column}
-      \begin{column}{0.485\linewidth}
-        \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.40em]{resultbox}
-          \centering
-          \textcolor{VTMaroon}{\textbf{Small integrator}}\\[0.10em]
-          {\fontsize{20}{24}\selectfont
-          Crosses threshold at fewer conditions\\
-          High sensitivity\\
-          More false positives}
-        \end{beamercolorbox}
-      \end{column}
-    \end{columns}
+        \node[anchor=west,font=\fontsize{21}{24}\selectfont\bfseries]
+          at (0,5.7) {Accuracy (\%)};
+        \fill[SoftGray] (0,4.60) rectangle (100,5.08);
+        \fill[AnalystBlue] (0,4.60) rectangle (84.5,5.08);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont]
+          at (86.1,4.84) {84.5};
+        \fill[SoftGray] (0,3.82) rectangle (100,4.30);
+        \fill[VTMaroon] (0,3.82) rectangle (66.4,4.30);
+        \node[anchor=west,font=\fontsize{19}{22}\selectfont\bfseries]
+          at (68.0,4.06) {66.4};
+      \end{tikzpicture}
 
-    \vspace{0.35em}
-    \begin{itemize}\tightitems
-      \item Both families rank patients alike by number of recorded
-        conditions; they differ in \emph{where} that count becomes a positive
-        call.
-      \item Changing only the integrator raises the predicted-positive rate by
-        \textbf{30.2 points} on MIMIC-IV mortality.
-      \item \textbf{56\%} of decedents missed by the large integrator are
-        flagged by the small one.
-    \end{itemize}
-  \end{block}
+      \vspace{0.12em}
+      \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.48em]{notebox}
+        \justifying
+        \textbf{More deaths flagged, more false positives.} Macro-F1 is
+        similar to Claude few-shot, while sensitivity rises by
+        \textbf{45.3 points} and accuracy falls by \textbf{18.1 points}.
+      \end{beamercolorbox}
 
-  \vspace{0.25cm}
+      \vspace{0.28em}
+      \justifying
+      The mixed system's full-test AUROC is \textbf{.706}, versus \textbf{.763}
+      for a single GPT-OSS agent. The benefit is at the default cutoff,
+      rather than stronger ranking. Task-supervised KARE has higher
+      macro-F1 (90.4).
+    \end{block}
 
-  \begin{block}{Boundary: Readmission Is an Honest Negative}
-    \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.40em]{boundarybox}
+    \vspace{0.27cm}
+
+    \begin{block}{Integrator Swap Across All Test Sets}
       \centering
-      \textbf{Signal in the pre-discharge record (MIMIC-IV)}\\[0.15em]
-      \begin{tabular}{@{}lcc@{}}
-        & \textbf{Mortality} & \textbf{Readmission}\\
-        Bag-of-codes AUROC & 0.77 & 0.59\\
-        Single-LLM CoT AUROC & 0.763 & 0.431\\
-      \end{tabular}
-    \end{beamercolorbox}
-
-    \vspace{0.30em}
-    \justifying
-    The same lower threshold transfers to 15-day readmission, but the record
-    carries little signal for this post-discharge outcome: sensitivity
-    $43.5 \to 94.5$, Macro-F1 $47.2 \to 34.7$, specificity $\approx 4\%$.
-
-    \vspace{0.25em}
-    \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.40em]{boundarybox}
-      \centering\textbf{A sensitive integrator cannot recover outcome signal
-      that is absent from the available record.}
-    \end{beamercolorbox}
-  \end{block}
-
-\end{column}
-
-\end{columns}
-
-\vspace{0.30cm}
-
-% =============================================================================
-% Row 3: scope and limitations strip | QR codes
-% =============================================================================
-\begin{columns}[c,totalwidth=\textwidth]
-
-  \begin{column}{0.845\textwidth}
-    \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.50em]{notebox}
-      \textcolor{VTMaroon}{\textbf{Scope and limitations}}\par\vspace{0.15em}
+      {\fontsize{20}{24}\selectfont Qwen instead of GPT-OSS at integration;
+      analysts and retrieval model fixed}\par\vspace{0.22em}
       {\fontsize{21}{25}\selectfont
-      \begin{columns}[T,totalwidth=0.98\linewidth]
-        \begin{column}{0.235\linewidth}
-          \textbf{Evidence concentration.} The mixed assignment shows clear
-          discrimination only on MIMIC-IV mortality.
-        \end{column}
-        \begin{column}{0.235\linewidth}
-          \textbf{Generalizability.} MIMIC only, two model families, no
-          external or prospective validation.
-        \end{column}
-        \begin{column}{0.235\linewidth}
-          \textbf{Not a uniform gain.} Fine-tuned KARE and the single large
-          model lead on F1 and AUROC; our edge is the threshold.
-        \end{column}
-        \begin{column}{0.235\linewidth}
-          \textbf{Design and review.} One exemplar per outcome class, no
-          top-$k$; no clinician review of intermediate reasoning.
-        \end{column}
-      \end{columns}}
-    \end{beamercolorbox}
+      \begin{tabular}{@{}lrr@{}}
+        \toprule
+        \textbf{Outcome} & \textbf{$\Delta$ Sens.} & \textbf{$\Delta$ Macro-F1} \\
+        \midrule
+        \rowcolor{IntegratorGold!24}
+        MIMIC-IV mortality & +46.4 & +4.4 \\
+        MIMIC-III mortality & +37.1 & $-$16.7 \\
+        MIMIC-IV readmission & +51.0 & $-$12.5 \\
+        MIMIC-III readmission & +54.1 & $-$12.6 \\
+        \bottomrule
+      \end{tabular}}
+
+      \vspace{0.26em}
+      \justifying
+      Changes are \textbf{percentage points} versus the all-large pipeline.
+      Sensitivity rises in all four settings, but macro-F1 improves only on
+      MIMIC-IV mortality.
+    \end{block}
   \end{column}
 
+  \begin{column}{0.315\textwidth}
+    \begin{block}{Mechanism: Where Risk Crosses 0.5}
+      \centering
+      \includegraphics[width=0.80\linewidth]
+        {Newposter-PromptLink/figures/mortality_condition_count.png}
+
+      \vspace{0.12em}
+      \justifying
+      \textbf{Figure 2.} Among \emph{survivors}, both integrators raise
+      predicted risk as recorded conditions increase. Qwen crosses the
+      0.5 decision threshold earlier, creating more false positives.
+      Error bars show standard error. The mixed system also flags
+      \textbf{56\%} of decedents missed by the all-large system.
+    \end{block}
+
+    \vspace{0.27cm}
+
+    \begin{block}{Boundary: Readmission}
+      \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.45em]{boundarybox}
+        \centering
+        \textbf{MIMIC-IV, all-large $\rightarrow$ mixed}\par\vspace{0.16em}
+        Sensitivity \textbf{43.5 $\rightarrow$ 94.5}\quad
+        Macro-F1 \textbf{47.2 $\rightarrow$ 34.7}
+      \end{beamercolorbox}
+      \vspace{0.22em}
+      \justifying
+      The lower threshold gives about \textbf{4\% specificity}. A
+      bag-of-codes probe reaches AUROC \textbf{.77} for mortality but only
+      \textbf{.59} for readmission on MIMIC-IV: the available record has
+      weaker signal for this post-discharge outcome.
+    \end{block}
+  \end{column}
+\end{columns}
+
+\vspace{0.38cm}
+
+% A compact scope line and two QR codes remain below the evidence.
+\begin{columns}[c,totalwidth=\textwidth]
+  \begin{column}{0.845\textwidth}
+    \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.50em]{notebox}
+      \textbf{Scope.} Evaluated on MIMIC-III/IV mortality and 15-day
+      readmission, using two open-weight model families. No external or
+      prospective validation; the result does not surpass fine-tuned models
+      on overall macro-F1.
+    \end{beamercolorbox}
+  \end{column}
   \begin{column}{0.14\textwidth}
     \centering
     \begin{columns}[c,totalwidth=\linewidth]
       \begin{column}{0.48\linewidth}
         \centering
-        \qrcode[height=4.0cm]{https://arxiv.org/abs/2608.22176}\\[0.05em]
+        \qrcode[height=3.5cm]{https://arxiv.org/abs/2608.22176}\\[0.05em]
         {\fontsize{18}{22}\selectfont\textbf{Paper}}
       \end{column}
       \begin{column}{0.48\linewidth}
         \centering
-        \qrcode[height=4.0cm]{https://github.com/JuneHou/moa-clinical-rag}\\[0.05em]
+        \qrcode[height=3.5cm]{https://github.com/JuneHou/moa-clinical-rag}\\[0.05em]
         {\fontsize{18}{22}\selectfont\textbf{Code}}
       \end{column}
     \end{columns}
   \end{column}
-
 \end{columns}
 
 \vfill
 
-% =============================================================================
-% Compact footer
-% =============================================================================
 {\fontsize{14}{17}\selectfont
 \begin{beamercolorbox}[wd=\textwidth,sep=0.35em]{notebox}
   \textbf{Selected references:}
