@@ -22,6 +22,7 @@
 
 % Only packages used by this poster.
 \usepackage[T1]{fontenc}
+\usepackage{etoolbox}
 \usepackage{lmodern}
 \usepackage{amsmath}
 \usepackage{array}
@@ -436,14 +437,6 @@ for Clinical Prediction}
 % A compact scope line and two QR codes remain below the evidence.
 \begin{columns}[c,totalwidth=\textwidth]
   \begin{column}{0.845\textwidth}
-    \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.50em]{notebox}
-      \textbf{Scope.} Evaluated on MIMIC-III/IV mortality and 15-day
-      readmission, using two open-weight model families. No external or
-      prospective validation; the result does not surpass fine-tuned models
-      on overall macro-F1.
-    \end{beamercolorbox}
-  \end{column}
-  \begin{column}{0.14\textwidth}
     \centering
     \begin{columns}[c,totalwidth=\linewidth]
       \begin{column}{0.48\linewidth}
@@ -470,10 +463,7 @@ for Clinical Prediction}
   \quad Xiong et al., ``MedRAG,'' ACL Findings 2024.
   \quad Wang et al., ``Mixture-of-Agents,'' ICLR 2025.\\[0.10em]
   \textbf{Acknowledgments:}
-  NSF 2442253 and 2607580; NIH 1R21AG091260-01; USDA NIFA; Commonwealth Cyber
-  Initiative; gifts from Nvidia, Cisco, and the Amazon--Virginia Tech
-  Initiative; and the Delta system at NCSA through ACCESS/NAIRR allocation
-  NAIRR240202.
+  This research is sponsored by NSF 2442253, 2607580, NIH 1R21AG091260-01, USDA NIFA, Commonwealth Cyber Initiative, and generous gifts from Nvidia, Cisco, and the Amazon-Virginia Tech Initiative. This research used the Delta system at the National Center for Supercomputing Applications [award OAC 2005572] through allocation [NAIRR240202] from the Advanced Cyberinfrastructure Coordination Ecosystem: Services \& Support (ACCESS) program, which is supported by National Science Foundation grants #2138259, #2138286, #2138307, #2137603, and #2138296.
 \end{beamercolorbox}
 }
 
