@@ -434,9 +434,9 @@ for Clinical Prediction}
 
 \vspace{0.15cm}
 
-% Bottom row: references + acknowledgments | two QR codes stacked on the right.
+% Bottom row: references + acknowledgments | two QR codes side by side on the right.
 \begin{columns}[c,totalwidth=\textwidth]
-  \begin{column}{0.865\textwidth}
+  \begin{column}{0.845\textwidth}
     {\fontsize{19}{23}\selectfont
     \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.45em]{notebox}
       \justifying
@@ -449,12 +449,14 @@ for Clinical Prediction}
   This research is sponsored by NSF 2442253, 2607580, NIH 1R21AG091260-01, USDA NIFA, Commonwealth Cyber Initiative, and generous gifts from Nvidia, Cisco, and the Amazon-Virginia Tech Initiative. This research used the Delta system at the National Center for Supercomputing Applications [award OAC 2005572] through allocation [NAIRR240202] from the Advanced Cyberinfrastructure Coordination Ecosystem: Services \& Support (ACCESS) program, which is supported by National Science Foundation grants \#2138259, \#2138286, \#2138307, \#2137603, and \#2138296.
     \end{beamercolorbox}}
   \end{column}
-  \begin{column}{0.12\textwidth}
-    \raggedleft
-    {\fontsize{18}{22}\selectfont\textbf{Paper}}\hspace{0.3em}%
-    \raisebox{-0.5\height}{\qrcode[height=2.6cm]{https://arxiv.org/abs/2608.22176}}\\[0.12cm]
-    {\fontsize{18}{22}\selectfont\textbf{Code}}\hspace{0.3em}%
-    \raisebox{-0.5\height}{\qrcode[height=2.6cm]{https://github.com/JuneHou/moa-clinical-rag}}
+  \begin{column}{0.145\textwidth}
+    \centering
+    \begin{tabular}{@{}c@{\hspace{0.5cm}}c@{}}
+      \qrcode[height=4.4cm]{https://arxiv.org/abs/2608.22176} &
+      \qrcode[height=4.4cm]{https://github.com/JuneHou/moa-clinical-rag}\\[0.05em]
+      {\fontsize{18}{22}\selectfont\textbf{Paper}} &
+      {\fontsize{18}{22}\selectfont\textbf{Code}}
+    \end{tabular}
   \end{column}
 \end{columns}
 
