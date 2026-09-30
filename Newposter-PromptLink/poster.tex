@@ -432,40 +432,31 @@ for Clinical Prediction}
   \end{column}
 \end{columns}
 
-\vspace{0.38cm}
+\vspace{0.15cm}
 
-% A compact scope line and two QR codes remain below the evidence.
+% Bottom row: references + acknowledgments | two QR codes stacked on the right.
 \begin{columns}[c,totalwidth=\textwidth]
-  \begin{column}{0.845\textwidth}
-    \centering
-    \begin{columns}[c,totalwidth=\linewidth]
-      \begin{column}{0.48\linewidth}
-        \centering
-        \qrcode[height=3.5cm]{https://arxiv.org/abs/2608.22176}\\[0.05em]
-        {\fontsize{18}{22}\selectfont\textbf{Paper}}
-      \end{column}
-      \begin{column}{0.48\linewidth}
-        \centering
-        \qrcode[height=3.5cm]{https://github.com/JuneHou/moa-clinical-rag}\\[0.05em]
-        {\fontsize{18}{22}\selectfont\textbf{Code}}
-      \end{column}
-    \end{columns}
+  \begin{column}{0.865\textwidth}
+    {\fontsize{19}{23}\selectfont
+    \begin{beamercolorbox}[wd=\linewidth,rounded=true,sep=0.45em]{notebox}
+      \justifying
+      \textbf{Selected references:}
+      Jiang et al., ``KARE,'' WWW 2025.
+      \quad Jin et al., ``MedCPT,'' \emph{Bioinformatics} 2023.
+      \quad Xiong et al., ``MedRAG,'' ACL Findings 2024.
+      \quad Wang et al., ``Mixture-of-Agents,'' ICLR 2025.\par\vspace{0.25em}
+      \textbf{Acknowledgments:}
+  This research is sponsored by NSF 2442253, 2607580, NIH 1R21AG091260-01, USDA NIFA, Commonwealth Cyber Initiative, and generous gifts from Nvidia, Cisco, and the Amazon-Virginia Tech Initiative. This research used the Delta system at the National Center for Supercomputing Applications [award OAC 2005572] through allocation [NAIRR240202] from the Advanced Cyberinfrastructure Coordination Ecosystem: Services \& Support (ACCESS) program, which is supported by National Science Foundation grants \#2138259, \#2138286, \#2138307, \#2137603, and \#2138296.
+    \end{beamercolorbox}}
+  \end{column}
+  \begin{column}{0.12\textwidth}
+    \raggedleft
+    {\fontsize{18}{22}\selectfont\textbf{Paper}}\hspace{0.3em}%
+    \raisebox{-0.5\height}{\qrcode[height=2.6cm]{https://arxiv.org/abs/2608.22176}}\\[0.12cm]
+    {\fontsize{18}{22}\selectfont\textbf{Code}}\hspace{0.3em}%
+    \raisebox{-0.5\height}{\qrcode[height=2.6cm]{https://github.com/JuneHou/moa-clinical-rag}}
   \end{column}
 \end{columns}
-
-\vfill
-
-{\fontsize{14}{17}\selectfont
-\begin{beamercolorbox}[wd=\textwidth,sep=0.35em]{notebox}
-  \textbf{Selected references:}
-  Jiang et al., ``KARE,'' WWW 2025.
-  \quad Jin et al., ``MedCPT,'' \emph{Bioinformatics} 2023.
-  \quad Xiong et al., ``MedRAG,'' ACL Findings 2024.
-  \quad Wang et al., ``Mixture-of-Agents,'' ICLR 2025.\\[0.10em]
-  \textbf{Acknowledgments:}
-  This research is sponsored by NSF 2442253, 2607580, NIH 1R21AG091260-01, USDA NIFA, Commonwealth Cyber Initiative, and generous gifts from Nvidia, Cisco, and the Amazon-Virginia Tech Initiative. This research used the Delta system at the National Center for Supercomputing Applications [award OAC 2005572] through allocation [NAIRR240202] from the Advanced Cyberinfrastructure Coordination Ecosystem: Services \& Support (ACCESS) program, which is supported by National Science Foundation grants #2138259, #2138286, #2138307, #2137603, and #2138296.
-\end{beamercolorbox}
-}
 
 \end{frame}
 \end{document}
